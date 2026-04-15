@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PayPal PayLater Message Dashboard
+
+A **Next.js 16 / React 19** developer tool for testing PayPal Pay Later eligibility and rendering.
+
+## Main Features
+
+### 1. Eligibility Check (`/eligibility`)
+Batch-tests PayPal Pay Later eligibility across 8 countries (US, GB, DE, FR, IT, ES, AU, CA) via the PayPal credit-presentment API — no SDK required. All checks run in parallel with `Promise.all`.
+
+### 2. Checkout Demo (`/checkout`)
+Simulated checkout page demonstrating:
+- Dynamic PayPal SDK injection per buyer country
+- `isFundingEligible(PAYLATER)` eligibility detection
+- PayLater button rendering via `sdk.Buttons()`
+- **All-countries PayLater Message section** — a dedicated `data-pp-message` auto-rendering area using a single shared SDK script (`PayPalMessageSDK` namespace). Shows messages for all 8 supported countries simultaneously.
+
+## Key Implementation Notes
+
+- The Checkout page uses a unique `namespace` per SDK load to avoid collisions when rapidly switching countries
+- Currency mismatches between `buyer-country` and SDK load currency can cause `paypal_messages_buyer_country_currency_mismatch` errors — handled by using a separate message-only SDK script
+- `COUNTRY_LIST` (eligibility) and `CHECKOUT_COUNTRIES` (checkout) are intentionally separate lists in `countries.ts`
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) — choose Eligibility Check or Checkout Demo from the homepage.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 16 (App Router, Turbopack)
+- React 19
+- PayPal JS SDK v5 (dynamically injected, no npm package)
+- Edge Runtime API route for credit-presentment proxy

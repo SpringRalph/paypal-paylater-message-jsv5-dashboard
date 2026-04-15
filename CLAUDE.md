@@ -54,9 +54,35 @@ Country selected → loadPayPalSDK(country)
     → if eligible: sdk.Buttons(...).render() + sdk.Messages(...).render()
 ```
 
+### Data flow — All Countries Message Section (2026-04-15)
+
+Checkout page contains a dedicated section below the payment area that displays PayLater Messages for all 8 supported countries simultaneously. Uses a single shared SDK script:
+
+```
+<Script id="paypal-message-sdk" data-namespace="PayPalMessageSDK"
+  src="https://www.paypal.com/sdk/js?client-id=test&components=messages" />
+
+JSX: {supportedCountries.map(country => (
+  <div key={country.value} data-pp-message data-pp-placement="product"
+      data-pp-amount="160" data-pp-buyercountry={country.value} />
+))}
+```
+
+SDK auto-scans and renders all `data-pp-message` elements after script loads. Each card shows country label + rendered message in a bordered pill container.
+
 ## Important notes
 
 - The API route uses `export const runtime = "edge"` — keep it Edge-compatible (no Node.js APIs).
 - `src/lib/paypal.ts` contains **hardcoded public PayPal Client IDs** for demo purposes. Do not treat these as secrets, but do not add real merchant credentials here.
 - The checkout page uses a unique `namespace` per SDK load (`paypal_${country}_${timestamp}`) to avoid collisions when switching countries rapidly.
 - `COUNTRY_LIST` (eligibility) and `CHECKOUT_COUNTRIES` (checkout dropdown) are separate lists in `countries.ts` — keep them in sync intentionally when adding countries.
+- When `buyer-country` currency mismatches the SDK load currency, PayPal returns `paypal_messages_buyer_country_currency_mismatch`. The all-countries message section avoids this by using a separate message-only SDK script with a generic `client-id=test` and letting `data-pp-buyercountry` attribute drive per-card rendering.
+
+## Changelog
+
+### 2026-04-15
+- Added "All Countries PayLater Message" section to checkout page — displays all 8 supported countries' PayLater Messages simultaneously using `data-pp-message` auto-rendering with a single shared SDK script (`PayPalMessageSDK` namespace)
+- Fixed bug: `data-pp-buyercountry` was incorrectly passing the full country object instead of `country.value`
+- Added country label above each message card
+- Added GitHub link to homepage
+- Rewrote README.md to reflect project scope
