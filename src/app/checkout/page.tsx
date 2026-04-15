@@ -232,7 +232,7 @@ export default function CheckoutPage() {
 
         return (
             <>
-                <Tooltip text="PayLater Message这里有一个bug, 在重选国家后无法及时重新渲染并显示对应国家的文本" />
+                <Tooltip text="PayLater Message这里有一个本页面代码层面的bug, 在重选国家后无法及时重新渲染并显示对应国家的文本. 具体国家的真实文本参考下方区域" />
                 <div
                     data-pp-message
                     data-pp-amount={160}
@@ -372,6 +372,61 @@ export default function CheckoutPage() {
                             {/* <div id="paypal-message-container"></div> */}
                         </div>
                     </div>
+                </div>
+
+                {/* All Countries PayLater Message Section */}
+                <AllCountriesMessageSection />
+            </div>
+        </div>
+    );
+}
+
+function AllCountriesMessageSection() {
+    const supportedCountries = CHECKOUT_COUNTRIES.filter((c) => c.supported);
+
+    useEffect(() => {
+        if (document.getElementById("paypal-message-sdk")) return;
+
+        const script = document.createElement("script");
+        script.id = "paypal-message-sdk";
+        script.setAttribute("data-namespace", "PayPalMessageSDK");
+        script.src =
+            "https://www.paypal.com/sdk/js?client-id=test&components=messages";
+
+        script.onload = () => {
+            // Script loaded, SDK will auto-render data-pp-message elements
+        };
+
+        document.head.appendChild(script);
+    }, []);
+
+    return (
+        <div className="mt-8">
+            <h2 className="text-xl font-bold text-[#111] mb-4">
+                所有国家 PayLater Message 展示一览
+            </h2>
+            <div className="bg-white rounded-xl shadow-[0 4px_15px_rgba(0,0,0,0.05)] p-6">
+                <p className="text-sm text-[#666] mb-4">
+                    以下展示 8 个国家的 PayPal Pay Later
+                    Message（固定展示，不随上方国家选择变化）：
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                    {supportedCountries.map((country) => (
+                        <div
+                            key={country.value}
+                            className="border border-[#e0e0e0] rounded-lg p-4"
+                        >
+                            <div className="text-sm font-semibold text-[#333] mb-2">
+                                {country.label}
+                            </div>
+                            <div
+                                data-pp-message
+                                data-pp-placement="product"
+                                data-pp-amount="160"
+                                data-pp-buyercountry={country.value}
+                            />
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
