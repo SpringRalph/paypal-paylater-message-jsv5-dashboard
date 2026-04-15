@@ -232,7 +232,7 @@ export default function CheckoutPage() {
 
         return (
             <>
-                <Tooltip text="PayLater Message这里有一个bug, 及时重新渲染, 也无法显示对应国家的标语" />
+                <Tooltip text="PayLater Message这里有一个bug, 在重选国家后无法及时重新渲染并显示对应国家的文本" />
                 <div
                     data-pp-message
                     data-pp-amount={160}
