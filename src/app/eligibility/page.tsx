@@ -7,6 +7,7 @@ import { COUNTRY_LIST, COUNTRY_LABELS } from "@/lib/countries";
 import { PAYPAL_CLIENT_ID_LIVE } from "@/lib/paypal";
 import { ClientIdCombobox } from "@/components/ClientIdCombobox";
 import Link from "next/link";
+import { checkEligibility } from "@/lib/eligibility";
 
 type Environment = "sandbox" | "live";
 
@@ -48,40 +49,48 @@ export default function EligibilityPage() {
   }, []);
 
   async function checkCountry(country: string): Promise<CountryResult> {
-    const params = new URLSearchParams({
-      buyer_country: country,
-      client_id: clientId.trim() || (environment === "sandbox" ? "test" : ""),
-      environment,
-    });
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const effClientId = clientId.trim() || (environment === "sandbox" ? "test" : "")
+    const result = await checkEligibility(country, effClientId, environment);
 
-    try {
-      const res = await fetch(`/api/paylater-check?${params}`, {
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      const data = await res.json();
-
-      if (data.error === "timeout") {
-        return { country, status: "error", reason: "Timeout" };
-      } else if (data.http_code === 200) {
-        return { country, status: "success", reason: "Eligible (HTTP 200)" };
-      } else if (data.http_code === 403) {
-        return { country, status: "error", reason: "Not authorized (HTTP 403)" };
-      } else if (data.http_code) {
-        return { country, status: "error", reason: `HTTP ${data.http_code}` };
-      } else {
-        return { country, status: "error", reason: `Error: ${data.error}` };
-      }
-    } catch (err: unknown) {
-      clearTimeout(timeout);
-      if (err instanceof Error && err.name === "AbortError") {
-        return { country, status: "error", reason: "Timeout (no response)" };
-      }
-      return { country, status: "error", reason: `Network error` };
+    return {
+      country, status: result.status, reason: result.reason
     }
+
+    // const params = new URLSearchParams({
+    //   buyer_country: country,
+    //   client_id: clientId.trim() || (environment === "sandbox" ? "test" : ""),
+    //   environment,
+    // });
+
+    // const controller = new AbortController();
+    // const timeout = setTimeout(() => controller.abort(), 12000);
+
+    // try {
+    //   const res = await fetch(`/api/paylater-check?${params}`, {
+    //     signal: controller.signal,
+    //   });
+    //   clearTimeout(timeout);
+    //   const data = await res.json();
+
+    //   if (data.error === "timeout") {
+    //     return { country, status: "error", reason: "Timeout" };
+    //   } else if (data.http_code === 200) {
+    //     return { country, status: "success", reason: "Eligible (HTTP 200)" };
+    //   } else if (data.http_code === 403) {
+    //     return { country, status: "error", reason: "Not authorized (HTTP 403)" };
+    //   } else if (data.http_code) {
+    //     return { country, status: "error", reason: `HTTP ${data.http_code}` };
+    //   } else {
+    //     return { country, status: "error", reason: `Error: ${data.error}` };
+    //   }
+    // } catch (err: unknown) {
+    //   clearTimeout(timeout);
+    //   if (err instanceof Error && err.name === "AbortError") {
+    //     return { country, status: "error", reason: "Timeout (no response)" };
+    //   }
+    //   return { country, status: "error", reason: `Network error` };
+    // }
   }
 
   async function runTests() {
