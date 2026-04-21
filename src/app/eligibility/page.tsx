@@ -5,6 +5,7 @@ import { StatusCard, CardStatus } from "@/components/StatusCard";
 import { LogPanel } from "@/components/LogPanel";
 import { COUNTRY_LIST, COUNTRY_LABELS } from "@/lib/countries";
 import { PAYPAL_CLIENT_ID_LIVE } from "@/lib/paypal";
+import { ClientIdCombobox } from "@/components/ClientIdCombobox";
 import Link from "next/link";
 
 type Environment = "sandbox" | "live";
@@ -141,13 +142,7 @@ export default function EligibilityPage() {
           {/* Client ID */}
           <div className="col-span-1 md:col-span-3">
             <label className="block text-[#616161] font-medium mb-2">PayPal Client ID</label>
-            <input
-              type="text"
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              className="w-full px-4 py-2 border border-[#e0e0e0] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6200ee]/50 transition-all"
-              placeholder="Enter your PayPal Client ID"
-            />
+            <ClientIdCombobox value={clientId} onChange={setClientId} />
           </div>
 
           {/* Site Country */}
